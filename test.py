@@ -1,4 +1,5 @@
 import pandas as pd
+import sqlite3
 import selenium 
 from selenium import webdriver
 import time
@@ -9,7 +10,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import os
+
+dbfile = "test.db"
+conn = sqlite3.connect(dbfile)
+c = conn.cursor()
 # 判斷用網址
+check_url = "https://www.fatfoodieshop.com.tw/%E8%82%89%E9%AC%86%E9%A4%85"
 check_list = ["https://www.fatfoodieshop.com.tw/%E8%82%89%E9%AC%86%E9%A4%85"]
 # 存放所有資料
 infoAll = []
@@ -57,30 +63,59 @@ for keyword in keywords:
             element = result.find_element_by_css_selector("a")
             link = element.get_attribute("href")
             header = result.find_element_by_css_selector("h3").text
-            now = datetime.date.today().strftime("%d-%m-%Y")
+            now = datetime.date.today().strftime("%Y-%m-%d")
             if link in check_list:
-                pageInfo.append({ "公司":company, "搜尋國家":country, "關鍵字": keyword, "排名": count, "網址": link,"爬取時間": now})
-        return pageInfo,sum
+                # sql_check = "select url from url where url = '';"
+                sql_check = "select url from url where url = '{}';".format(check_url)
+                c.execute(sql_check)
+                check = c.fetchone()
+                print(check[0])
+                if check[0] == 'None':
+                    sql_url = "insert into url(url, company) values('{}','{}');".format(link, company )
+                    c.execute(sql_url)
+                    get_uid = "select id from url where url ='{}';".format(check_url)
+                    c.execute(get_uid)
+                    uid = c.fetchone()
+                    sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
+                    c.execute(sql_keyword)
+                else:
+                    get_uid = "select id from url where url ='{}';".format(check_url)
+                    c.execute(get_uid)
+                    uid = c.fetchone()
+                    sql_check_keyword = "select keyword from keyword where keyword = '{}' and uid = {};".format(keyword,uid[0])
+                    c.execute(sql_check_keyword)
+                    check_keyword = c.fetchone()
+                    print(check_keyword[0])
+                    sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
+                    c.execute(sql_keyword)
+
+                conn.commit()
+                conn.close()
+                # sql_show = "select * from url"
+                # test = c.execute(sql_show)
+                # print(test)
+                # pageInfo.append({ "公司":company, "搜尋國家":country, "關鍵字": keyword, "排名": count, "網址": link,"爬取時間": now})
+        return sum
 
 
     # 爬取頁面
     numPages = 5
     
     # 先爬取首頁
-    page_info, rank = scrape(0)
+    rank = scrape(0)
     sum == rank
-    infoAll.extend(page_info)
+    # infoAll.extend(page_info)
     
     for i in range(0, numPages - 1):
         sleep(3) #睡覺
         nextButton = driver.find_element_by_link_text("下一頁")
         nextButton.click()
-        page_info, rank = scrape(sum)
+        rank = scrape(sum)
         sum = sum + rank
-        infoAll.extend(page_info)
+        # infoAll.extend(page_info)
         
     driver.close()
 # 存成excel
-df = pd.DataFrame(infoAll)
-df.to_csv('./'+ company +'.csv', index=False)
-print("Done! 檔案已存入當前目錄")
+# df = pd.DataFrame(infoAll)
+# df.to_csv('./'+ company +'.csv', index=False)
+# print("Done! 檔案已存入當前目錄")
