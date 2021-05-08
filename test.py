@@ -15,8 +15,8 @@ dbfile = "test.db"
 conn = sqlite3.connect(dbfile)
 c = conn.cursor()
 # 判斷用網址
-check_url = "https://www.fatfoodieshop.com.tw/%E8%82%89%E9%AC%86%E9%A4%85"
-check_list = ["https://www.fatfoodieshop.com.tw/%E8%82%89%E9%AC%86%E9%A4%85"]
+check_url = "https://www.python.org/"
+check_list = ["https://www.python.org/"]
 # 存放所有資料
 infoAll = []
 # 放關鍵字
@@ -67,10 +67,11 @@ for keyword in keywords:
             if link in check_list:
                 # sql_check = "select url from url where url = '';"
                 sql_check = "select url from url where url = '{}';".format(check_url)
+                print(sql_check)
                 c.execute(sql_check)
                 check = c.fetchone()
-                print(check[0])
-                if check[0] == 'None':
+                # print(check)
+                if check is None:
                     sql_url = "insert into url(url, company) values('{}','{}');".format(link, company )
                     c.execute(sql_url)
                     get_uid = "select id from url where url ='{}';".format(check_url)
@@ -78,24 +79,33 @@ for keyword in keywords:
                     uid = c.fetchone()
                     sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
                     c.execute(sql_keyword)
+                    print("if")
                 else:
+                    print("else")
                     get_uid = "select id from url where url ='{}';".format(check_url)
                     c.execute(get_uid)
                     uid = c.fetchone()
-                    sql_check_keyword = "select keyword from keyword where keyword = '{}' and uid = {};".format(keyword,uid[0])
+                    print(uid)
+                    sql_check_keyword = "select keyword from keyword where keyword = '{}' and uid = {} and date = '{}';".format(keyword,uid[0],now)
+                    print(sql_check_keyword)
                     c.execute(sql_check_keyword)
                     check_keyword = c.fetchone()
-                    print(check_keyword[0])
-                    sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
-                    c.execute(sql_keyword)
+                    if check_keyword is None:
+                        sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
+                        print(sql_keyword)
+                        c.execute(sql_keyword)
+                    else:
+                        print("already exist")
+
 
                 conn.commit()
-                conn.close()
+                    
                 # sql_show = "select * from url"
                 # test = c.execute(sql_show)
                 # print(test)
                 # pageInfo.append({ "公司":company, "搜尋國家":country, "關鍵字": keyword, "排名": count, "網址": link,"爬取時間": now})
-        return sum
+                # conn.close()
+            return sum
 
 
     # 爬取頁面
