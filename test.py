@@ -90,8 +90,10 @@ for keyword in keywords:
                     print(sql_check_keyword)
                     c.execute(sql_check_keyword)
                     check_keyword = c.fetchone()
-                    if check_keyword is None:
-                        sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
+                    print(check_keyword)
+                    if not check_keyword:
+                        print("insert keyowrd")
+                        sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}',{},{});".format(keyword, count, now, uid[0] )
                         print(sql_keyword)
                         c.execute(sql_keyword)
                     else:
