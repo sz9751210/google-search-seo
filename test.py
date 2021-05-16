@@ -15,8 +15,8 @@ dbfile = "test.db"
 conn = sqlite3.connect(dbfile)
 c = conn.cursor()
 # 判斷用網址
-check_url = "https://www.python.org/"
-check_list = ["https://www.python.org/"]
+check_url = "https://mtmgseo.com/"
+check_list = ["https://mtmgseo.com/"]
 # 存放所有資料
 infoAll = []
 # 放關鍵字
@@ -46,26 +46,31 @@ for keyword in keywords:
 
     def scrape(count):
         pageInfo = []
-        try:
-            # 透過try/catch等待網頁爬取到所有搜尋結果
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "g"))
-            )
+        # try:
+        #     # 透過try/catch等待網頁爬取到所有搜尋結果
+        #     WebDriverWait(driver, 10).until(
+        #         EC.presence_of_element_located((By.CLASS_NAME, "g"))
+        #     )
 
-        except Exception as e:
-            print(e)
-            driver.quit()
+        # except Exception as e:
+        #     print(e)
+        #     driver.quit()
         # 把搜尋結果放入list
         searchResults = driver.find_elements_by_class_name("g")
+        # print(len(searchResults))
         for result in searchResults:
+            print(result)
             count = count +1
             sum = count
+            # print(sum)
             element = result.find_element_by_css_selector("a")
             link = element.get_attribute("href")
             header = result.find_element_by_css_selector("h3").text
             now = datetime.date.today().strftime("%Y-%m-%d")
+            print(header)
             if link in check_list:
                 # sql_check = "select url from url where url = '';"
+                print(1)
                 sql_check = "select url from url where url = '{}';".format(check_url)
                 print(sql_check)
                 c.execute(sql_check)
@@ -112,7 +117,7 @@ for keyword in keywords:
                 # print(test)
                 # pageInfo.append({ "公司":company, "搜尋國家":country, "關鍵字": keyword, "排名": count, "網址": link,"爬取時間": now})
                 # conn.close()
-            return sum
+        return sum
 
 
     # 爬取頁面
