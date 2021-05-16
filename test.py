@@ -71,6 +71,7 @@ for keyword in keywords:
                 c.execute(sql_check)
                 check = c.fetchone()
                 # print(check)
+                # 確認url是否已存在
                 if check is None:
                     sql_url = "insert into url(url, company) values('{}','{}');".format(link, company )
                     c.execute(sql_url)
@@ -85,20 +86,24 @@ for keyword in keywords:
                     get_uid = "select id from url where url ='{}';".format(check_url)
                     c.execute(get_uid)
                     uid = c.fetchone()
-                    print(uid)
                     sql_check_keyword = "select keyword from keyword where keyword = '{}' and uid = {} and date = '{}';".format(keyword,uid[0],now)
                     print(sql_check_keyword)
                     c.execute(sql_check_keyword)
                     check_keyword = c.fetchone()
                     print(check_keyword)
-                    if not check_keyword:
+                    if check_keyword is None:
                         print("insert keyowrd")
-                        sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}',{},{});".format(keyword, count, now, uid[0] )
+                        print(now)
+                        sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
                         print(sql_keyword)
                         c.execute(sql_keyword)
                     else:
                         print("already exist")
-
+                # get_test = "select keyword, rank, date from keyword where keyword ='{}' and (date between '2021-05-08' and '2021-05-09') ;".format(keyword)
+                # c.execute(get_test)
+                # test = c.fetchall()
+                # for i in test:
+                #     print("關鍵字: '{}' 排名: '{}' 時間: '{}'".format(i[0],i[1],i[2]))
 
                 conn.commit()
                     
