@@ -37,20 +37,20 @@ def scrape(count):
                 get_uid = "select id from url where url ='{}';".format(check_url)
                 c.execute(get_uid)
                 uid = c.fetchone()
-                sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
+                sql_keyword = "insert into '{}'(keyword, rank, date, uid) values('{}','{}','{}',{});".format(company,keyword, count, now, uid[0] )
                 c.execute(sql_keyword)
                 print("結果已儲存")
             else:
                 get_uid = "select id from url where url ='{}';".format(check_url)
                 c.execute(get_uid)
                 uid = c.fetchone()
-                sql_check_keyword = "select keyword from keyword where keyword = '{}' and uid = {} and date = '{}';".format(keyword,uid[0],now)
+                sql_check_keyword = "select keyword from '{}' where keyword = '{}' and uid = {} and date = '{}';".format(company,keyword,uid[0],now)
                 c.execute(sql_check_keyword)
                 check_keyword = c.fetchone()
 
                 # 確認關鍵字是否存在
                 if check_keyword is None:
-                    sql_keyword = "insert into keyword(keyword, rank, date, uid) values('{}','{}','{}',{});".format(keyword, count, now, uid[0] )
+                    sql_keyword = "insert into '{}'(keyword, rank, date, uid) values('{}','{}','{}',{});".format(company,keyword, count, now, uid[0] )
                     c.execute(sql_keyword)
                     print("結果已儲存")
                 else:
@@ -64,7 +64,7 @@ def scrape(count):
 
             conn.commit()
                 
-            sql_show = "select keyword, rank, date from keyword where keyword = '{}' and  date = '{}'".format(keyword,now)
+            sql_show = "select keyword, rank, date from '{}' where keyword = '{}' and  date = '{}'".format(company,keyword,now)
             c.execute(sql_show)
             test = c.fetchall()
             for i in test:
@@ -89,6 +89,18 @@ infoAll = []
 company_txt = open("company.txt","r",encoding = 'utf8')
 company = company_txt.read()
 company_txt.close()
+
+# 建立資料表
+command = '''CREATE TABLE if not exists '{}' (
+	"kid"	INTEGER NOT NULL,
+	"keyword"	TEXT,
+	"rank"	TEXT,
+	"date"	TEXT,
+	"uid"	INTEGER NOT NULL,
+	PRIMARY KEY("kid" AUTOINCREMENT),
+	FOREIGN KEY("uid") REFERENCES "url"("id")
+);'''.format(company)
+c.execute(command)
 # 關鍵字
 splitOn = ','
 keywords = []
