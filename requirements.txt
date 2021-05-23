@@ -1,3 +1,8 @@
+pandas
+selenium
+bs4
+
+
 selenium==3.141.0
 urllib3==1.26.4
 pandas==1.1.5
