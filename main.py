@@ -23,7 +23,6 @@ def scrape(count):
         link = element.get_attribute("href")
         # header = result.find_element_by_css_selector("h3").text
         now = datetime.date.today().strftime("%Y-%m-%d")
-
         # 找到網址並確認資料庫是否存在
         if link == check_url:
             sql_check = "select url from url where url = '{}';".format(check_url)
@@ -113,7 +112,7 @@ sum = 0
 # create instance of webdriver
 options = webdriver.ChromeOptions() 
 options.add_argument('–log-level=3')
-options.add_argument('-headless')
+# options.add_argument('-headless')
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
 driver = webdriver.Chrome(options=options,service_log_path=os.devnull, executable_path=r'D:\test\chromedriver.exe')
 url = "https://www.google.com"
@@ -143,7 +142,17 @@ for keyword in keywords:
     # 先爬取首頁
     rank = scrape(0)
     sum == rank
+    now = datetime.date.today().strftime("%Y-%m-%d")
+    get_uid = "select id from url where url ='{}';".format(check_url)
+    c.execute(get_uid)
+    uid = c.fetchone()
+    sql_check_keyword = "select keyword from '{}' where keyword = '{}' and uid = {} and date = '{}';".format(company,keyword,uid[0],now)
+    c.execute(sql_check_keyword)
+    check_keyword = c.fetchone()
 
+    # # 確認關鍵字是否存在
+    if check_keyword is not None:
+        continue
     
     for i in range(0, numPages - 1):
         driver.implicitly_wait(3)
@@ -151,6 +160,12 @@ for keyword in keywords:
         nextButton.click()
         rank = scrape(sum)
         sum = sum + rank
+        # 確認關鍵字是否存在
+        sql_check_keyword = "select keyword from '{}' where keyword = '{}' and uid = {} and date = '{}';".format(company,keyword,uid[0],now)
+        c.execute(sql_check_keyword)
+        check_keyword = c.fetchone()
+        if check_keyword is not None:
+            break
 
 # 關閉瀏覽器
 driver.close()
